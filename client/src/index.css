@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Leaflet/Map demo helpers */
+.marker-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  border: 2px solid rgba(0, 0, 0, 0.65);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+.marker-dot--available {
+  background: #22c55e;
+}
+.marker-dot--claimed {
+  background: #f59e0b;
+}
+.marker-dot--expired {
+  background: #ef4444;
+}
+.marker-dot--completed {
+  background: #3b82f6;
+}
