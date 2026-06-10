@@ -7,8 +7,10 @@ import type { Listing } from '../lib/types'
 
 function linkClass({ isActive }: { isActive: boolean }) {
   return [
-    'rounded-lg px-3 py-2 text-sm font-semibold transition',
-    isActive ? 'bg-slate-100 text-slate-950' : 'text-slate-200 hover:bg-slate-800',
+    'relative rounded-lg px-3 py-2 text-sm font-semibold transition-all duration-200',
+    isActive
+      ? 'bg-slate-100 text-slate-950 shadow-sm'
+      : 'text-slate-300 hover:bg-slate-800 hover:text-white',
   ].join(' ')
 }
 
@@ -44,107 +46,299 @@ export function Navbar() {
   }, [])
 
   return (
-    <div className="z-50 border-b border-slate-800 bg-slate-950/80 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-400/15 ring-1 ring-emerald-400/40">
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 24 24"
-              className="h-5 w-5 text-emerald-300"
-            >
-              <path
-                fill="currentColor"
-                d="M6.5 3C5.67 3 5 3.67 5 4.5v7a1 1 0 0 0 2 0V9h.5v2.5a1 1 0 0 0 2 0v-7C9.5 3.67 8.83 3 8 3s-1.5.67-1.5 1.5V7H6.5V4.5C6.5 3.67 5.83 3 5 3Zm8.75 0a1 1 0 0 0-1 1v5.25a3.25 3.25 0 1 0 2 0V4a1 1 0 0 0-1-1Zm3.25 9c-.55 0-1 .45-1 1v2.25a3.75 3.75 0 1 0 2 0V13a1 1 0 0 0-1-1Z"
-              />
-            </svg>
-          </div>
-          <div>
-            <div className="text-sm font-semibold tracking-tight text-slate-100">
-              Food Donation
-            </div>
-            <div className="text-xs text-slate-400">Connect surplus food to NGOs</div>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <NavLink to="/" className={linkClass} end>
-            Map
-          </NavLink>
-          <NavLink to="/dashboard" className={linkClass}>
-            Dashboard
-          </NavLink>
+    <>
+      {/* Injected styles */}
+      <style>{`
+        @keyframes shimmer {
+          0% { background-position: -200% center; }
+          100% { background-position: 200% center; }
+        }
+        @keyframes fadeSlideDown {
+          from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+          to   { opacity: 1; transform: translateY(0)  scale(1); }
+        }
+        @keyframes pulse-ring {
+          0%   { box-shadow: 0 0 0 0 rgba(52,211,153,0.45); }
+          70%  { box-shadow: 0 0 0 7px rgba(52,211,153,0); }
+          100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); }
+        }
+        .navbar-root {
+          position: relative;
+          z-index: 50;
+        }
+        /* Animated top gradient line */
+        .navbar-root::before {
+          content: '';
+          position: absolute;
+          inset: 0 0 auto 0;
+          height: 1.5px;
+          background: linear-gradient(90deg,
+            transparent 0%,
+            #34d399 20%,
+            #6ee7b7 50%,
+            #34d399 80%,
+            transparent 100%);
+          background-size: 200% auto;
+          animation: shimmer 3s linear infinite;
+          opacity: 0.7;
+        }
+        /* Bottom border with subtle glow */
+        .navbar-root::after {
+          content: '';
+          position: absolute;
+          inset: auto 0 0 0;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(51,65,85,0.8), transparent);
+        }
+        .navbar-bg {
+          background: 
+            radial-gradient(ellipse 60% 80% at 50% -20%, rgba(52,211,153,0.06) 0%, transparent 70%),
+            rgba(2,8,20,0.82);
+          backdrop-filter: blur(20px) saturate(160%);
+          -webkit-backdrop-filter: blur(20px) saturate(160%);
+        }
+        .logo-icon {
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 40px; height: 40px;
+          border-radius: 12px;
+          background: linear-gradient(135deg, rgba(52,211,153,0.18) 0%, rgba(16,185,129,0.08) 100%);
+          border: 1px solid rgba(52,211,153,0.3);
+          box-shadow: 0 0 16px rgba(52,211,153,0.12), inset 0 1px 0 rgba(255,255,255,0.06);
+          transition: all 0.3s ease;
+          font-size: 18px;
+        }
+        .logo-wrap:hover .logo-icon {
+          border-color: rgba(52,211,153,0.55);
+          box-shadow: 0 0 24px rgba(52,211,153,0.22), inset 0 1px 0 rgba(255,255,255,0.1);
+          transform: scale(1.06) rotate(-2deg);
+        }
+        .logo-name {
+          font-size: 14px;
+          font-weight: 800;
+          letter-spacing: 0.04em;
+          background: linear-gradient(90deg, #fff 0%, #6ee7b7 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          transition: all 0.3s;
+        }
+        .logo-wrap:hover .logo-name {
+          background: linear-gradient(90deg, #6ee7b7 0%, #34d399 100%);
+          -webkit-background-clip: text;
+          background-clip: text;
+        }
+        .notif-btn {
+          position: relative;
+          display: flex; align-items: center; justify-content: center;
+          width: 38px; height: 38px;
+          border-radius: 50%;
+          background: rgba(15,23,42,0.9);
+          border: 1px solid rgba(51,65,85,0.8);
+          color: white;
+          font-size: 16px;
+          transition: all 0.2s ease;
+          cursor: pointer;
+        }
+        .notif-btn:hover {
+          background: rgba(30,41,59,0.95);
+          border-color: rgba(52,211,153,0.35);
+          box-shadow: 0 0 12px rgba(52,211,153,0.15);
+        }
+        .notif-badge {
+          position: absolute;
+          top: -3px; right: -3px;
+          min-width: 16px; height: 16px;
+          padding: 0 4px;
+          border-radius: 999px;
+          background: linear-gradient(135deg, #34d399, #10b981);
+          color: #020c1a;
+          font-size: 9px;
+          font-weight: 800;
+          display: flex; align-items: center; justify-content: center;
+          box-shadow: 0 0 8px rgba(52,211,153,0.6);
+          animation: pulse-ring 1.8s ease-out infinite;
+        }
+        .notif-panel {
+          position: fixed;
+          top: 58px; right: 16px;
+          z-index: 60;
+          width: 288px;
+          border-radius: 16px;
+          border: 1px solid rgba(51,65,85,0.7);
+          background: 
+            radial-gradient(ellipse 80% 60% at 50% 0%, rgba(52,211,153,0.07) 0%, transparent 70%),
+            rgba(2,8,20,0.96);
+          backdrop-filter: blur(24px) saturate(180%);
+          -webkit-backdrop-filter: blur(24px) saturate(180%);
+          padding: 14px;
+          box-shadow: 
+            0 24px 48px rgba(0,0,0,0.5),
+            0 0 0 1px rgba(52,211,153,0.08),
+            inset 0 1px 0 rgba(255,255,255,0.04);
+          animation: fadeSlideDown 0.22s ease forwards;
+        }
+        .notif-header {
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: #64748b;
+          margin-bottom: 10px;
+          padding-bottom: 8px;
+          border-bottom: 1px solid rgba(51,65,85,0.5);
+        }
+        .notif-item {
+          border-radius: 10px;
+          border: 1px solid rgba(51,65,85,0.6);
+          background: rgba(15,23,42,0.6);
+          padding: 8px 12px;
+          transition: all 0.18s ease;
+          cursor: default;
+        }
+        .notif-item:hover {
+          background: rgba(30,41,59,0.8);
+          border-color: rgba(52,211,153,0.2);
+          transform: translateX(2px);
+        }
+        .avatar-ring {
+          width: 36px; height: 36px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #34d399 0%, #10b981 60%, #059669 100%);
+          display: flex; align-items: center; justify-content: center;
+          font-size: 13px;
+          font-weight: 800;
+          color: #020c1a;
+          box-shadow: 0 0 0 2px rgba(52,211,153,0.25), 0 0 12px rgba(52,211,153,0.2);
+          transition: box-shadow 0.2s;
+        }
+        .avatar-ring:hover {
+          box-shadow: 0 0 0 2px rgba(52,211,153,0.5), 0 0 20px rgba(52,211,153,0.3);
+        }
+        .logout-btn {
+          border-radius: 10px;
+          background: rgba(30,41,59,0.8);
+          border: 1px solid rgba(51,65,85,0.6);
+          padding: 7px 14px;
+          font-size: 13px;
+          font-weight: 600;
+          color: #cbd5e1;
+          transition: all 0.2s ease;
+          cursor: pointer;
+        }
+        .logout-btn:hover {
+          background: rgba(239,68,68,0.15);
+          border-color: rgba(239,68,68,0.4);
+          color: #fca5a5;
+          box-shadow: 0 0 12px rgba(239,68,68,0.1);
+        }
+        .nav-link-active-glow {
+          /* extra glow for active links — applied via JS className */
+        }
+      `}</style>
 
-          <div className="relative ml-1">
-            <button
-              type="button"
-              onClick={() => setNotifsOpen((o) => !o)}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-700 bg-slate-900 text-xs font-semibold text-slate-100 hover:bg-slate-800"
-              title="New food listings (near NGO)"
-            >
-              N
-              {notifs.length > 0 ? (
-                <span className="ml-0.5 rounded-full bg-emerald-400 px-1 text-[9px] font-bold text-slate-950">
-                  {notifs.length}
-                </span>
-              ) : null}
-            </button>
-            {notifsOpen ? (
-              <div className="fixed top-14 right-4 z-50 w-64 rounded-xl border border-slate-800 bg-slate-950/95 p-3 text-xs text-slate-100 shadow-lg">
-                <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-                  Nearby food (NGO)
+      <div className="navbar-root">
+        <div className="navbar-bg">
+          <div
+            style={{
+              maxWidth: '1152px',
+              margin: '0 auto',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '10px 16px',
+            }}
+          >
+            {/* ── Logo ── */}
+            <div className="logo-wrap" style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
+              <div className="logo-icon">🍱</div>
+              <div>
+                <div className="logo-name">FoodConnect</div>
+                <div style={{ fontSize: '11px', color: '#64748b', marginTop: '1px' }}>
+                  Smart food sharing
                 </div>
-                {notifError ? (
-                  <div className="text-[11px] text-red-300">{notifError}</div>
-                ) : notifs.length === 0 ? (
-                  <div className="text-[11px] text-slate-400">No available listings right now.</div>
-                ) : (
-                  <div className="space-y-1 max-h-72 overflow-y-auto">
-                    {notifs.map((l) => (
-                      <div
-                        key={l._id}
-                        className="rounded-lg border border-slate-800 bg-slate-900/60 px-2 py-1.5 text-[11px]"
-                      >
-                        <div className="font-semibold">
-                          {l.restaurantName || 'Hotel'}{' '}
-                          <span className="font-normal text-slate-300">· {l.foodType}</span>
-                        </div>
-                        {typeof l.distanceKm === 'number' ? (
-                          <div className="text-[10px] text-slate-400">
-                            {l.distanceKm.toFixed(2)} km from NGO
-                          </div>
-                        ) : null}
+              </div>
+            </div>
+
+            {/* ── Right cluster ── */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <NavLink to="/" className={linkClass} end>
+                Map
+              </NavLink>
+              <NavLink to="/dashboard" className={linkClass}>
+                Dashboard
+              </NavLink>
+
+              {/* Notifications */}
+              <div style={{ position: 'relative', marginLeft: '6px' }}>
+                <button
+                  type="button"
+                  className="notif-btn"
+                  onClick={() => setNotifsOpen((o) => !o)}
+                  title="New food listings (near NGO)"
+                >
+                  🔔
+                  {notifs.length > 0 && (
+                    <span className="notif-badge">{notifs.length}</span>
+                  )}
+                </button>
+
+                {notifsOpen && (
+                  <div className="notif-panel">
+                    <div className="notif-header">📍 Nearby food · NGO</div>
+
+                    {notifError ? (
+                      <div style={{ fontSize: '11px', color: '#fca5a5' }}>{notifError}</div>
+                    ) : notifs.length === 0 ? (
+                      <div style={{ fontSize: '11px', color: '#64748b' }}>
+                        No available listings right now.
                       </div>
-                    ))}
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '280px', overflowY: 'auto' }}>
+                        {notifs.map((l) => (
+                          <div key={l._id} className="notif-item">
+                            <div style={{ fontSize: '12px', fontWeight: 600, color: '#f1f5f9' }}>
+                              {l.restaurantName || 'Hotel'}{' '}
+                              <span style={{ fontWeight: 400, color: '#94a3b8' }}>· {l.foodType}</span>
+                            </div>
+                            {typeof l.distanceKm === 'number' && (
+                              <div style={{ fontSize: '10px', color: '#475569', marginTop: '2px' }}>
+                                📌 {l.distanceKm.toFixed(2)} km away
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
-            ) : null}
-          </div>
 
-          {user ? (
-            <div className="ml-2 flex items-center gap-2">
-              <div
-                title={user.email}
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-sm font-extrabold text-slate-950"
-              >
-                {letter}
-              </div>
-              <button
-                onClick={logout}
-                className="rounded-lg bg-slate-800 px-3 py-2 text-sm font-semibold text-slate-100 hover:bg-slate-700"
-                type="button"
-              >
-                Logout
-              </button>
+              {/* User */}
+              {user ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '8px' }}>
+                  <div className="avatar-ring" title={user.email}>
+                    {letter}
+                  </div>
+                  <button
+                    type="button"
+                    className="logout-btn"
+                    onClick={logout}
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <NavLink to="/login" className={linkClass}>
+                  Login
+                </NavLink>
+              )}
             </div>
-          ) : (
-            <NavLink to="/login" className={linkClass}>
-              Login
-            </NavLink>
-          )}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
-

@@ -15,6 +15,7 @@ const ListingSchema = new mongoose.Schema(
       ref: 'User',
       required: false,
     },
+    restaurantName: { type: String, required: false },
     foodType: { type: String, required: true, trim: true },
     quantity: { type: Number, required: true, min: 1 },
     expiryTime: { type: Date, required: true },

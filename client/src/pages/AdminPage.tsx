@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet'
 import type { LatLngExpression } from 'leaflet'
 
@@ -21,8 +20,6 @@ function LocationPicker({
 }
 
 export function AdminPage() {
-  const navigate = useNavigate()
-
   const [restaurantName, setRestaurantName] = useState('Restaurant (Demo)')
   const [foodType, setFoodType] = useState('Veg Meals')
   const [quantity, setQuantity] = useState(20)
@@ -33,6 +30,7 @@ export function AdminPage() {
 
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const [locStatus, setLocStatus] = useState<string | null>(null)
 
   const markerRef = useRef<L.Marker | null>(null)
@@ -57,8 +55,9 @@ export function AdminPage() {
     e.preventDefault()
     setSubmitting(true)
     setError(null)
+    setSuccess(null)
     try {
-      const created = await apiCreateListingWithImage({
+      await apiCreateListingWithImage({
         restaurantName,
         foodType,
         quantity,
@@ -67,7 +66,8 @@ export function AdminPage() {
         longitude,
         imageFile,
       })
-      navigate(`/food/${created.listing._id}`)
+      setSuccess('Posted successfully. NGOs will be notified.')
+      setImageFile(null)
     } catch (e2) {
       setError(e2 instanceof Error ? e2.message : 'Failed to post food')
     } finally {
@@ -112,6 +112,12 @@ export function AdminPage() {
       {error ? (
         <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
           {error}
+        </div>
+      ) : null}
+
+      {success ? (
+        <div className="mt-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
+          {success}
         </div>
       ) : null}
 

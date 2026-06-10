@@ -189,6 +189,10 @@ router.post('/', upload.single('image'), async (req, res) => {
     createDoc.restaurantId = restaurantId
   }
 
+  if (restaurantName) {
+    createDoc.restaurantName = restaurantName
+  }
+
   const created = await Listing.create({
     ...createDoc,
   })
